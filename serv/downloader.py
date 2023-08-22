@@ -7,13 +7,14 @@ MIME_AUDIO = "audio"
 class Downloader():
     _streams: list[Stream]
     
+    def __init__(self) -> None:
+        self._streams = [Stream]
+        
     def get_streams(self, link: str, mime_type: str) -> list[str]:
         print(f"Looking for link {link}")
         url = yt(link)
         self._streams.clear()
-        for stream in url.streams:
-            if(mime_type in stream.mime_type):
-                self._streams.append(stream)
+        self._streams = [stream for stream in url.streams if mime_type == stream.type]
         
         # convert to a list of strings...
         print(self._streams)

@@ -14,20 +14,21 @@ class DownController():
         self._downloader = Downloader()
         # add events and so...
         
-    def _on_click_search(self) -> None:
-        # get the settings:
-            # - mime
-            # - link
-            
+    def _on_click_search(self, link:str, mime:str) -> None:
+        print("OnClick controller")
+        print(f"Link: {link}\tMime: {mime}")
+        # get the list
+        self._downloader.get_streams(link, mime) #TODO: list
+                    
         # pass the list to the view
             # - show data
             # - show miniature
-        pass
-    
+            
     def _on_download(self) -> None:
         # download the video
         # TODO: with custom path?
         pass
     
     def start(self) -> None:
+        self._main_window.subscribe_on_click(self._on_click_search)
         self._main_window.mainloop()
