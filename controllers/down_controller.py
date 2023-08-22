@@ -2,18 +2,11 @@ from serv.downloader import Downloader
 from views.main_window import MainWindow
 
 class DownController():
-    _main_window : MainWindow
-    _downloader : Downloader
+   
     
-    @property
-    def get_main_window(self) -> MainWindow:
-        return self._main_window
-    
-    @property
-    def get_downloader(self) -> Downloader:
-        return self._downloader
-    
+       
     def __init__(self):
+        print("init")
         # create main window
         self._main_window = MainWindow.init_default_window()
         
@@ -35,3 +28,6 @@ class DownController():
         # download the video
         # TODO: with custom path?
         pass
+    
+    def start(self) -> None:
+        self._main_window.mainloop()
