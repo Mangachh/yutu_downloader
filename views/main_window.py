@@ -10,7 +10,7 @@ class MainWindow(tk.Tk):
         super().__init__(screenName, baseName, className, useTk, sync, use)
         # default settings
         self.link = tk.StringVar()
-        self.download_button: Button
+        self.btn_search: Button
         # self.link_enter tk.Entry
         self.mime_var = tk.StringVar()
         self.on_click_methods = []
@@ -18,7 +18,8 @@ class MainWindow(tk.Tk):
     @staticmethod
     def init_default_window() -> tk.Tk:
         window = MainWindow()
-        window.geometry('500x500')
+        window.geometry('700x500')
+        window.title ="Yutú Downloader :D"
         window.create_search_frame()        
         
         return window
@@ -26,9 +27,9 @@ class MainWindow(tk.Tk):
     
     def create_search_frame(self) -> None:
         self.rowconfigure(1, weight=1)
-        self.columnconfigure(1, weight=1)
-        frame = tk.Frame(self, background="red", width=500, height=400)
-        frame.grid(row=0, column=0, sticky="nw")
+        self.columnconfigure(0, weight=1)
+        frame = tk.Frame(self, background="red", width=700, height=350)
+        frame.grid(row=0, column=0, sticky=tk.E+tk.W+tk.N+tk.S)
         frame.grid_propagate(False)
         
         # labels
@@ -38,7 +39,7 @@ class MainWindow(tk.Tk):
         lbl_link.place(relx=0.1, rely=0.37, anchor='w')        
         
         # input
-        ent_input = tk.Entry(frame, font="arial 14", width=37, textvariable=self.link)          
+        ent_input = tk.Entry(frame, font="arial 14", width=50, textvariable=self.link)          
         ent_input.place(relx=0.1, rely=0.47, anchor='w')
         
         # radio
@@ -49,8 +50,8 @@ class MainWindow(tk.Tk):
         rd_audio.place(relx=0.3, rely=0.55, anchor="w")
         
         # search button
-        btn_search = tk.Button(frame, text="SEARCH", command=self.on_click_search, font="arial 18 bold")
-        btn_search.place(relx=0.5, rely=0.75, anchor="center")
+        self.btn_search = tk.Button(frame, text="SEARCH", command=self.on_click_search, font="arial 18 bold")
+        self.btn_search.place(relx=0.5, rely=0.75, anchor="center")
         
     
     def sel(self)->None:
@@ -60,12 +61,15 @@ class MainWindow(tk.Tk):
     def on_click_search(self) -> None:
         print("Click!")
         print(f"Link: {self.link.get()}\nMime: {self.mime_var.get()}")
+        self.btn_search.config(text="SEARCHING")
+        self.update_idletasks()
         # aquí ira la func que queremos
         for m in self.on_click_methods:
             try:
                 m(self.link.get(), self.mime_var.get())
             except Exception as e:
                 print(e)
+        self.btn_search.config(text="SEARCH")
     
     def subscribe_on_click(self, fun) -> None:
         print(type(fun))
