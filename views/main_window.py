@@ -14,14 +14,16 @@ class MainWindow(tk.Tk):
         # self.link_enter tk.Entry
         self.mime_var = tk.StringVar()
         self.on_click_methods = []
+        self.list_frame: tk.Frame
+        self.itag_selection = tk.StringVar()
         
     @staticmethod
     def init_default_window() -> tk.Tk:
         window = MainWindow()
-        window.geometry('700x500')
+        window.geometry('700x600')
         window.title ="Yutú Downloader :D"
         window.create_search_frame()        
-        
+        window.create_video_audio_frame()
         return window
     
     
@@ -39,7 +41,8 @@ class MainWindow(tk.Tk):
         lbl_link.place(relx=0.1, rely=0.37, anchor='w')        
         
         # input
-        ent_input = tk.Entry(frame, font="arial 14", width=50, textvariable=self.link)          
+        ent_input = tk.Entry(frame, font="arial 14", width=50, textvariable=self.link)   
+        self.link.set("https://www.youtube.com/watch?v=bkk59ARFv80")       
         ent_input.place(relx=0.1, rely=0.47, anchor='w')
         
         # radio
@@ -52,6 +55,13 @@ class MainWindow(tk.Tk):
         # search button
         self.btn_search = tk.Button(frame, text="SEARCH", command=self.on_click_search, font="arial 18 bold")
         self.btn_search.place(relx=0.5, rely=0.75, anchor="center")
+      
+    def create_video_audio_frame(self) -> None:
+        self.list_frame = tk.Frame(self, bg="blue", width=400, height=300)
+        self.list_frame.grid(row=1, column=0, sticky=tk.W+tk.N)
+        self.list_frame.grid_propagate(False)
+        
+        
         
     
     def sel(self)->None:
@@ -79,3 +89,36 @@ class MainWindow(tk.Tk):
     def unsubscribe_on_click(self, fun) -> None:
         self.on_click_methods.remove(fun)
     
+    def populate_list(self, link_list: list[dict]) -> None:
+        text: str        
+        
+        # first sort the list
+        def t(e) -> int:
+            if('res' in e):
+                return int(e['res'][:-1])
+            else:
+                return int(e['qual'][:-4])
+        
+        link_list.sort(reverse=True, key=t)
+        
+        for st in link_list:
+            text = ""                     
+            for k,v in st.items():
+                if(k == "itag"):
+                    continue
+                
+                print(f"{k} -> {v}")
+                text += f"{k}: {v} \t"
+            
+            # TODO: put this radios into a list to clear all   
+            radio_sel = tk.Radiobutton(
+                self.list_frame,
+                value=st["itag"],
+                variable=self.itag_selection,
+                command=self.sel,
+                text=text
+            )
+            
+            radio_sel.pack(anchor="w")
+        
+        self.itag_selection.set(link_list[0]["itag"])

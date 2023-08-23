@@ -10,16 +10,45 @@ class Downloader():
     def __init__(self) -> None:
         self._streams = [Stream]
         
-    def get_streams(self, link: str, mime_type: str) -> list[str]:
+    def get_streams(self, link: str, mime_type: str) -> list[dict]:
         print(f"Looking for link {link}")
         url = yt(link)
         self._streams.clear()
-        self._streams = [stream for stream in url.streams if mime_type == stream.type]
+        stream_text : list[dict]
+        stream_text = []
+        # self._streams = [stream for stream in url.streams if mime_type == stream.type]
+        for stream in url.streams:
+            
+            if stream.type == mime_type:
+                if stream.type == MIME_AUDIO:
+                    stream_text.append(self.audio_dict(stream))
+                else:
+                    stream_text.append(self.video_dict(stream))
+                    
+                    
+                self._streams.append(stream)       
         
         # convert to a list of strings...
         print(self._streams)
-        return []
+        print(stream_text)
+        return stream_text
     
+    def audio_dict(self, stream: Stream) -> dict[str, str]:
+        audio = {}
+        audio["itag"] = stream.itag
+        audio["qual"] = stream.abr
+        audio["file"] = stream.mime_type.strip("audio/")
+        audio["codec"] = stream.audio_codec
+        return audio
+    
+    def video_dict(self, stream: Stream) -> dict[str, str]:
+        video = {}
+        video["itag"] = stream.itag
+        video["res"] = stream.resolution
+        video["fps"] = stream.fps
+        video["video"] = stream.mime_type.strip("video/")
+        video["codec"] = stream.video_codec
+        return video        
 
 def downloader(link: str)-> None:
     print(link)

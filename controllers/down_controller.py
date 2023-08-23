@@ -18,8 +18,8 @@ class DownController():
         print("OnClick controller")
         print(f"Link: {link}\tMime: {mime}")
         # get the list
-        self._downloader.get_streams(link, mime) #TODO: list
-                    
+        streams_text = self._downloader.get_streams(link, mime) 
+        self._main_window.populate_list(streams_text)        
         # pass the list to the view
             # - show data
             # - show miniature
