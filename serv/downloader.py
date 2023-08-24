@@ -17,6 +17,16 @@ class Downloader():
         return self._title
         
     def get_streams(self, link: str, mime_type: str) -> list[dict]:
+        """
+        Gets all the streams filtered by the mime
+
+        Args:
+            link (str): link where the stream are
+            mime_type (str): desired type
+
+        Returns:
+            list[dict]: dictionary with all the streams
+        """
         print(f"Looking for link {link}")
         url = yt(link)
         self._streams = url.streams.filter(only_audio=(mime_type == MIME_AUDIO),
@@ -24,6 +34,7 @@ class Downloader():
         self._title = url.title
         stream_text : list[dict]
         stream_text = []
+        
         # self._streams = [stream for stream in url.streams if mime_type == stream.type]
         for stream in url.streams:            
             if stream.type == mime_type:
@@ -32,12 +43,21 @@ class Downloader():
                 else:
                     stream_text.append(self.video_dict(stream))
         
-        # convert to a list of strings...
-        print(self._streams)
-        print(stream_text)
+        
+        # print(self._streams)
+        # print(stream_text)
         return stream_text
     
     def audio_dict(self, stream: Stream) -> dict[str, str]:
+        """
+        Converts an AUDIO stream to a dictionary
+
+        Args:
+            stream (Stream): stream to convert
+
+        Returns:
+            dict[str, str]: dictionary 
+        """
         audio = {}
         audio["itag"] = stream.itag
         audio["qual"] = stream.abr
@@ -46,6 +66,15 @@ class Downloader():
         return audio
     
     def video_dict(self, stream: Stream) -> dict[str, str]:
+        """
+        Converts a VIDEO stream to a dictionary
+
+        Args:
+            stream (Stream): video stream
+
+        Returns:
+            dict[str, str]: video dictionary
+        """
         video = {}
         video["itag"] = stream.itag
         video["res"] = stream.resolution
@@ -55,6 +84,14 @@ class Downloader():
         return video        
 
     def download(self, itag: str, path:str)-> None:
+        """
+        Downloads a stream to a desired path. If the stream has audio type, 
+        converts it to .mp3"
+
+        Args:
+            itag (str): itag of the stream to download
+            path (str): path to dowload
+        """
         # stream = [i for i in self._streams if i.itag == itag]
         stream = [i for i in self._streams if i.itag == int(itag)]
         

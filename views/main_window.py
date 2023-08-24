@@ -28,6 +28,12 @@ class MainWindow(tk.Tk):
         
     @staticmethod
     def init_default_window() -> tk.Tk:
+        """
+        Creates a main window
+
+        Returns:
+            tk.Tk: main window
+        """
         window = MainWindow()
         window.geometry(f'{window._WIN_WIDTH}x{window._WIN_HEIGHT}')
         window.title("Yutú Downloader :D")
@@ -41,6 +47,9 @@ class MainWindow(tk.Tk):
     
     
     def create_search_frame(self) -> None:
+        """
+        Creates the search frame with all the widgets
+        """
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
         frame = tk.Frame(self, background= self._COLOR_BACK, width=700, height=self._WIN_HEIGHT)
@@ -63,8 +72,8 @@ class MainWindow(tk.Tk):
         ent_input.place(relx=0.1, rely=0.32, anchor='w')
         
         # radio
-        rd_video = tk.Radiobutton(frame, text="Video", variable=self.mime_var, value="video", command=self.sel, bg=self._COLOR_BACK, font="arial 12 bold", fg=self._COLOR_FONT, selectcolor=self._COLOR_BACK)
-        rd_audio = tk.Radiobutton(frame, text="Audio", variable=self.mime_var, value="audio", command=self.sel, bg=self._COLOR_BACK, font="arial 12 bold", fg=self._COLOR_FONT, selectcolor=self._COLOR_BACK)
+        rd_video = tk.Radiobutton(frame, text="Video", variable=self.mime_var, value="video", command=self.on_select_radio, bg=self._COLOR_BACK, font="arial 12 bold", fg=self._COLOR_FONT, selectcolor=self._COLOR_BACK)
+        rd_audio = tk.Radiobutton(frame, text="Audio", variable=self.mime_var, value="audio", command=self.on_select_radio, bg=self._COLOR_BACK, font="arial 12 bold", fg=self._COLOR_FONT, selectcolor=self._COLOR_BACK)
         self.mime_var.set("video")
         rd_video.place(relx=0.1, rely=0.37, anchor="w")
         rd_audio.place(relx=0.3, rely=0.37, anchor="w")
@@ -79,6 +88,9 @@ class MainWindow(tk.Tk):
         self.btn_download.place_forget()
       
     def create_video_audio_frame(self) -> None:
+        """
+        Creates the video-audio frame with all the widgets
+        """
         self.list_frame = tk.Frame(self, bg=self._COLOR_BACK, width=430, height=self._WIN_HEIGHT)
         self.list_frame.grid(row=0, column=1, sticky=tk.W+tk.N)
         self.list_frame.grid_propagate(False)
@@ -88,11 +100,17 @@ class MainWindow(tk.Tk):
     
         
     
-    def sel(self)->None:
+    def on_select_radio(self)->None:
+        """
+        A simple event that shows the selection of the radio button
+        """
         selection = "Option " + self.mime_var.get()
         print(selection)
     
     def on_click_search(self) -> None:
+        """
+        Event raised when btn_search is clicked
+        """
         print("Click!")
         print(f"Link: {self.link.get()}\nMime: {self.mime_var.get()}")
         self.btn_search.config(text="SEARCHING")
@@ -110,6 +128,9 @@ class MainWindow(tk.Tk):
             self.btn_download.place(relx=0.5, rely=0.6, anchor="center")
         
     def on_click_download(self) -> None:
+        """
+        Event raised when btn_download is clicked
+        """
         print("Donwloading")
         path = filedialog.askdirectory(title="Select Folder")
         self.btn_download.config(text="DOWNLOADING")
@@ -123,12 +144,23 @@ class MainWindow(tk.Tk):
         
         
     def subscribe_on_click_search(self, fun) -> None:
+        """_summary_
+        Subscribes to the event raised when the button btn_search is clicked
+        Args:
+            fun (function [str]): function to raise,
+        """
         print(type(fun))
         if(fun not in self.on_click_search_methods):
             self.on_click_search_methods.append(fun)
     
     
     def subscribe_on_click_download(self, fun) -> None:
+        """
+        Subscribe to the event raised when btn_download is clicked
+
+        Args:
+            fun (function[str, str]): _description_
+        """
         print(type(fun))
         if(fun not in self.on_click_download_methods):
             self.on_click_download_methods.append(fun)
@@ -140,13 +172,35 @@ class MainWindow(tk.Tk):
         
         
     def populate_list(self, title:str, link_list: list[dict]) -> None:
+        """
+        Populates the list with the values of the dictionary. Each stream is a radiobutton with
+        the "itag" value of the dict.
+
+        Args:
+            title (str): Title of the video/audio
+            link_list (list[dict]): List of streams dictionary. To properly show each dictionary has
+            to have a "itag" key used as a value to identify.
+
+        
+        """
         text: str        
         self.list_frame.destroy()        
         self.create_video_audio_frame()
         # video title
         tk.Label(self.list_frame, bg=self._COLOR_BACK, fg=self._COLOR_FONT, text=title, font="arial 15 bold", wraplength=400, justify="left").pack()
         # first sort the list
+        
         def t(e) -> int:
+            """
+            Method to sort the list with the quality of each 
+            member.
+
+            Args:
+                e (dict): current value
+
+            Returns:
+                int: _description_
+            """
             if('res' in e):
                 return int(e['res'][:-1])
             else:
@@ -168,7 +222,7 @@ class MainWindow(tk.Tk):
                 self.list_frame,
                 value=st["itag"],
                 variable=self.itag_selection,
-                command=self.sel,
+                command=self.on_select_radio,
                 text=text,
                 bg=self._COLOR_BACK,
                 font="arial 10 bold",
