@@ -68,7 +68,7 @@ class MainWindow(tk.Tk):
 
         # input
         ent_input = tk.Entry(frame, font="arial 14", width=50, textvariable=self.link)   
-        self.link.set("https://www.youtube.com/watch?v=bkk59ARFv80")       
+        # self.link.set("https://www.youtube.com/watch?v=bkk59ARFv80")       
         ent_input.place(relx=0.1, rely=0.32, anchor='w')
         
         # radio

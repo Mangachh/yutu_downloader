@@ -30,13 +30,15 @@ class Downloader():
         print(f"Looking for link {link}")
         url = yt(link)
         self._streams = url.streams.filter(only_audio=(mime_type == MIME_AUDIO),
-                                           only_video=(mime_type == MIME_VIDEO))
+                                           only_video=(mime_type == MIME_VIDEO), file_extension="mp4").all()
+        
+        
         self._title = url.title
         stream_text : list[dict]
         stream_text = []
         
         # self._streams = [stream for stream in url.streams if mime_type == stream.type]
-        for stream in url.streams:            
+        for stream in self._streams:            
             if stream.type == mime_type:
                 if stream.type == MIME_AUDIO:
                     stream_text.append(self.audio_dict(stream))
@@ -44,7 +46,7 @@ class Downloader():
                     stream_text.append(self.video_dict(stream))
         
         
-        # print(self._streams)
+        
         # print(stream_text)
         return stream_text
     
