@@ -1,1 +1,10 @@
+# Virtual environment
 .venv
+
+# File extension
+.mp3
+.mp4
+.webm
+
+#pycache
+**/__pycache__

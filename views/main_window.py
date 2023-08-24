@@ -1,10 +1,16 @@
 import tkinter as tk
 from tkinter import Label
 from tkinter import Button
+from tkinter import filedialog
 
 DEF_LINK = "https://www.youtube.com/watch?v=o4qroNA05xs&list=RDyNcdVuPVXR0&index=16"
 
 class MainWindow(tk.Tk):   
+    
+    _COLOR_BACK = "#0E2E47"
+    _COLOR_FONT = "white"
+    _WIN_HEIGHT = 600
+    _WIN_WIDTH = 1100
     
     def __init__(self, screenName: str | None = None, baseName: str | None = None, className: str = "Tk", useTk: bool = True, sync: bool = False, use: str | None = None) -> None:
         super().__init__(screenName, baseName, className, useTk, sync, use)
@@ -13,55 +19,73 @@ class MainWindow(tk.Tk):
         self.btn_search: Button
         # self.link_enter tk.Entry
         self.mime_var = tk.StringVar()
-        self.on_click_methods = []
+        self.on_click_search_methods = []
+        self.on_click_download_methods = []
         self.list_frame: tk.Frame
         self.itag_selection = tk.StringVar()
+        self.radio_list_buttons = [tk.Radiobutton]
+        self.btn_download = tk.Button
         
     @staticmethod
     def init_default_window() -> tk.Tk:
         window = MainWindow()
-        window.geometry('700x600')
-        window.title ="Yutú Downloader :D"
+        window.geometry(f'{window._WIN_WIDTH}x{window._WIN_HEIGHT}')
+        window.title("Yutú Downloader :D")
+        window.config(bg=window._COLOR_BACK)
         window.create_search_frame()        
         window.create_video_audio_frame()
+        window.resizable(width=False, height=False)
+        photo = tk.PhotoImage(file="./data/youtube_icon.png")
+        window.iconphoto(False, photo)
         return window
     
     
     def create_search_frame(self) -> None:
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
-        frame = tk.Frame(self, background="red", width=700, height=350)
-        frame.grid(row=0, column=0, sticky=tk.E+tk.W+tk.N+tk.S)
+        frame = tk.Frame(self, background= self._COLOR_BACK, width=700, height=self._WIN_HEIGHT)
+        frame.grid(row=0, column=0)
         frame.grid_propagate(False)
+        frame.pack_propagate(False)
         
         # labels
-        lbl_title = tk.Label(frame, anchor="n", text="Yutú Downloader", font="arial 22 bold")
-        lbl_link = tk.Label(frame, anchor="w", text="Yutú Link:", font="arial 14")
-        lbl_title.place(relx=0.5, rely=0.2, anchor="center")
-        lbl_link.place(relx=0.1, rely=0.37, anchor='w')        
+        lbl_title = tk.Label(frame, anchor="n", text="Yutú Downloader", font="arial 22 bold", bg=self._COLOR_BACK, foreground=self._COLOR_FONT)
+        lbl_link = tk.Label(frame, anchor="w", text="Yutú Link:", font="arial 14", bg=self._COLOR_BACK, fg=self._COLOR_FONT)
+        lbl_title.place(relx=0.5, rely=0.1, anchor="center")
+        lbl_link.place(relx=0.1, rely=0.25, anchor='w')        
         
+        # delete text button
+        tk.Button(frame, text="DEL TEXT", command=lambda: self.link.set(""), font="arial 12 bold").place(relx=0.8, rely=0.25, anchor="center")
+
         # input
         ent_input = tk.Entry(frame, font="arial 14", width=50, textvariable=self.link)   
         self.link.set("https://www.youtube.com/watch?v=bkk59ARFv80")       
-        ent_input.place(relx=0.1, rely=0.47, anchor='w')
+        ent_input.place(relx=0.1, rely=0.32, anchor='w')
         
         # radio
-        rd_video = tk.Radiobutton(frame, text="Video", variable=self.mime_var, value="video", command=self.sel)
-        rd_audio = tk.Radiobutton(frame, text="Audio", variable=self.mime_var, value="audio", command=self.sel)
+        rd_video = tk.Radiobutton(frame, text="Video", variable=self.mime_var, value="video", command=self.sel, bg=self._COLOR_BACK, font="arial 12 bold", fg=self._COLOR_FONT, selectcolor=self._COLOR_BACK)
+        rd_audio = tk.Radiobutton(frame, text="Audio", variable=self.mime_var, value="audio", command=self.sel, bg=self._COLOR_BACK, font="arial 12 bold", fg=self._COLOR_FONT, selectcolor=self._COLOR_BACK)
         self.mime_var.set("video")
-        rd_video.place(relx=0.1, rely=0.55, anchor="w")
-        rd_audio.place(relx=0.3, rely=0.55, anchor="w")
+        rd_video.place(relx=0.1, rely=0.37, anchor="w")
+        rd_audio.place(relx=0.3, rely=0.37, anchor="w")
         
         # search button
         self.btn_search = tk.Button(frame, text="SEARCH", command=self.on_click_search, font="arial 18 bold")
-        self.btn_search.place(relx=0.5, rely=0.75, anchor="center")
+        self.btn_search.place(relx=0.5, rely=0.5, anchor="center")
+        
+        # download button
+        self.btn_download = tk.Button(frame, text="DOWNLOAD", command=self.on_click_download, font="arial 18 bold")
+        
+        self.btn_download.place_forget()
       
     def create_video_audio_frame(self) -> None:
-        self.list_frame = tk.Frame(self, bg="blue", width=400, height=300)
-        self.list_frame.grid(row=1, column=0, sticky=tk.W+tk.N)
+        self.list_frame = tk.Frame(self, bg=self._COLOR_BACK, width=430, height=self._WIN_HEIGHT)
+        self.list_frame.grid(row=0, column=1, sticky=tk.W+tk.N)
         self.list_frame.grid_propagate(False)
+        self.list_frame.pack_propagate(False)
         
         
+    
         
     
     def sel(self)->None:
@@ -74,24 +98,53 @@ class MainWindow(tk.Tk):
         self.btn_search.config(text="SEARCHING")
         self.update_idletasks()
         # aquí ira la func que queremos
-        for m in self.on_click_methods:
+        for m in self.on_click_search_methods:
             try:
                 m(self.link.get(), self.mime_var.get())
             except Exception as e:
                 print(e)
         self.btn_search.config(text="SEARCH")
-    
-    def subscribe_on_click(self, fun) -> None:
+        
+        # Download button
+        if self.itag_selection.get():
+            self.btn_download.place(relx=0.5, rely=0.6, anchor="center")
+        
+    def on_click_download(self) -> None:
+        print("Donwloading")
+        path = filedialog.askdirectory(title="Select Folder")
+        self.btn_download.config(text="DOWNLOADING")
+        self.update_idletasks()
+        for f in self.on_click_download_methods:
+            try:
+                f(self.itag_selection.get(), path)
+            except Exception as e:
+                print(e)
+        self.btn_download.config(text="DOWNLOAD")
+        
+        
+    def subscribe_on_click_search(self, fun) -> None:
         print(type(fun))
-        if(fun not in self.on_click_methods):
-            self.on_click_methods.append(fun)
+        if(fun not in self.on_click_search_methods):
+            self.on_click_search_methods.append(fun)
+    
+    
+    def subscribe_on_click_download(self, fun) -> None:
+        print(type(fun))
+        if(fun not in self.on_click_download_methods):
+            self.on_click_download_methods.append(fun)
             
     def unsubscribe_on_click(self, fun) -> None:
-        self.on_click_methods.remove(fun)
+        self.on_click_search_methods.remove(fun)
     
-    def populate_list(self, link_list: list[dict]) -> None:
-        text: str        
+    
         
+        
+    def populate_list(self, title:str, link_list: list[dict]) -> None:
+        text: str        
+        self.list_frame.destroy()        
+        self.create_video_audio_frame()
+        # video title
+        tk.Label(self.list_frame, bg=self._COLOR_BACK, fg=self._COLOR_FONT, text=title, font="arial 15 bold", wraplength=400, justify="left").pack()
         # first sort the list
         def t(e) -> int:
             if('res' in e):
@@ -110,15 +163,20 @@ class MainWindow(tk.Tk):
                 print(f"{k} -> {v}")
                 text += f"{k}: {v} \t"
             
-            # TODO: put this radios into a list to clear all   
+            # TODO: put this radios into a list to delete all  
             radio_sel = tk.Radiobutton(
                 self.list_frame,
                 value=st["itag"],
                 variable=self.itag_selection,
                 command=self.sel,
-                text=text
+                text=text,
+                bg=self._COLOR_BACK,
+                font="arial 10 bold",
+                fg=self._COLOR_FONT,
+                selectcolor=self._COLOR_BACK,
+                justify="left"
             )
             
-            radio_sel.pack(anchor="w")
+            radio_sel.pack(anchor="nw")
         
         self.itag_selection.set(link_list[0]["itag"])
