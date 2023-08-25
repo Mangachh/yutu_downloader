@@ -107,6 +107,11 @@ class Downloader():
         file = stream.download(output_path=path, filename_prefix="tmp_")
         print(f"Saved to {file}")
         
+        # TODO: tidy up all of this
+        # remove moviePy
+        # subscribe to events to show progress
+        # methods for audio and video
+        #fuck, is harder than i thought
         if stream.type == MIME_AUDIO:
             # change extension to mp3
             file_path = pathlib.Path(file)
