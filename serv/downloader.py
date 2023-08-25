@@ -4,6 +4,7 @@ from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import pathlib
 import os
 import ffmpeg
+import subprocess
 
 MIME_VIDEO = "video"
 MIME_AUDIO = "audio"
@@ -128,14 +129,19 @@ class Downloader():
                     audio_file = audio.download(output_path=path, filename_prefix="audio_")
                     new_path = pathlib.Path(audio_file).with_suffix(".mp3")
                     try:
-                        audio_file = file_path.rename(new_path)
-                        print(f"Renamed to: {renamed}")
+                        audio_file = pathlib.Path(audio_file).rename(new_path)
+                        print(f"Renamed to: {audio_file}")
                     except Exception as e:
                         print(e)
                         
-                    video_clip = ffmpeg.input(file)
-                    audio_clip = ffmpeg.input(audio_file)
-                    ffmpeg.concat(video_clip, audio_clip, v=1, a=1).output(f"{path}/{url.title}_.mp4").run(overwrite_output=True)
+                    # this is slow
+                    #video_clip = ffmpeg.input(file)
+                    #audio_clip = ffmpeg.input(audio_file)
+                    # ffmpeg.concat(video_clip, audio_clip, v=1, a=1).output(f"{path}/{url.title}_.mp4").run(overwrite_output=True)
+                    
+                    # this is fastest
+                    # like a lot
+                    subprocess.run(f"ffmpeg -i \"{file}\" -i \"{audio_file}\" -c copy \"{path}/{url.title}_.mp4\"")
                     os.remove(audio_file)
                     os.remove(file)
                                    
