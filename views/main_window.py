@@ -137,7 +137,7 @@ class MainWindow(tk.Tk):
         self.update_idletasks()
         for f in self.on_click_download_methods:
             try:
-                f(self.itag_selection.get(), path)
+                f(self.link.get(), self.itag_selection.get(), path)
             except Exception as e:
                 print(e)
         self.btn_download.config(text="DOWNLOAD")

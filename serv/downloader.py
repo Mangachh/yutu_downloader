@@ -1,13 +1,14 @@
 from pytube import YouTube as yt
 from pytube.streams import Stream
+from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import pathlib
+import os
+import ffmpeg
 
 MIME_VIDEO = "video"
 MIME_AUDIO = "audio"
 
 class Downloader():
-    _streams: list[Stream]
-    _title:str
     
     def __init__(self) -> None:
         self._streams = [Stream]
@@ -16,7 +17,7 @@ class Downloader():
     def get_title(self)->str:
         return self._title
         
-    def get_streams(self, link: str, mime_type: str) -> list[dict]:
+    def get_streams(self, link: str, mime_type: str) -> (str, list[dict]):
         """
         Gets all the streams filtered by the mime
 
@@ -29,16 +30,16 @@ class Downloader():
         """
         print(f"Looking for link {link}")
         url = yt(link)
-        self._streams = url.streams.filter(only_audio=(mime_type == MIME_AUDIO),
-                                           only_video=(mime_type == MIME_VIDEO), file_extension="mp4").all()
         
+        # save all the streams in our list, this way
+        # when downloading video will
         
-        self._title = url.title
         stream_text : list[dict]
         stream_text = []
         
         # self._streams = [stream for stream in url.streams if mime_type == stream.type]
-        for stream in self._streams:            
+        for stream in url.streams.filter(only_audio=(mime_type == MIME_AUDIO),
+                                        only_video=(mime_type == MIME_VIDEO), file_extension="mp4").all():            
             if stream.type == mime_type:
                 if stream.type == MIME_AUDIO:
                     stream_text.append(self.audio_dict(stream))
@@ -48,7 +49,7 @@ class Downloader():
         
         
         # print(stream_text)
-        return stream_text
+        return (url.title, stream_text)
     
     def audio_dict(self, stream: Stream) -> dict[str, str]:
         """
@@ -85,29 +86,58 @@ class Downloader():
         # video["codec"] = stream.video_codec
         return video        
 
-    def download(self, itag: str, path:str)-> None:
+    def download(self, link:str, itag: str, path:str)-> None:
         """
         Downloads a stream to a desired path. If the stream has audio type, 
         converts it to .mp3"
 
         Args:
+            link (str): link for the video/audio
             itag (str): itag of the stream to download
             path (str): path to dowload
         """
-        # stream = [i for i in self._streams if i.itag == itag]
-        stream = [i for i in self._streams if i.itag == int(itag)]
-        
-        if len(stream) != 0:
-            file = stream[0].download(output_path=path)
-            print(f"Saved to {file}")
+        # get the stream
+        url = yt(link)
+        try:
+            stream = url.streams.get_by_itag(int(itag))
+        except Exception as e:
+            print(e)
+            return
             
-            if stream[0].type == MIME_AUDIO:
-                # change extension to mp3
-                file_path = pathlib.Path(file)
-                new_path = file_path.with_suffix(".mp3")
+        file = stream.download(output_path=path, filename_prefix="tmp_")
+        print(f"Saved to {file}")
+        
+        if stream.type == MIME_AUDIO:
+            # change extension to mp3
+            file_path = pathlib.Path(file)
+            new_path = file_path.with_suffix(".mp3")
+            try:
+                renamed = file_path.rename(new_path)
+                print(f"Renamed to: {renamed}")
+            except Exception as e:
+                print(e)
+        else: # if is video
+            if stream.is_adaptive: # and adaptative, download the first audio and merge
+                audio = url.streams.filter(file_extension="mp4", only_audio=True).desc().first()
                 try:
-                    renamed = file_path.rename(new_path)
-                    print(f"Renamed to: {renamed}")
+                    audio_file = audio.download(output_path=path, filename_prefix="audio_")
+                    new_path = pathlib.Path(audio_file).with_suffix(".mp3")
+                    try:
+                        audio_file = file_path.rename(new_path)
+                        print(f"Renamed to: {renamed}")
+                    except Exception as e:
+                        print(e)
+                        
+                    video_clip = ffmpeg.input(file)
+                    audio_clip = ffmpeg.input(audio_file)
+                    ffmpeg.concat(video_clip, audio_clip, v=1, a=1).output(f"{path}/{url.title}_.mp4").run(overwrite_output=True)
+                    os.remove(audio_file)
+                    os.remove(file)
+                                   
                 except Exception as e:
                     print(e)
-                
+                pass
+                    
+            # if video, download the audio pfffff
+            # and merge
+            

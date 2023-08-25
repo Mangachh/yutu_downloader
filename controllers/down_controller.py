@@ -26,18 +26,19 @@ class DownController():
         print("OnClick controller")
         print(f"Link: {link}\tMime: {mime}")
         # get the list
-        streams_text = self._downloader.get_streams(link, mime) 
-        self._main_window.populate_list(self._downloader._title, streams_text)     
+        title, streams_text = self._downloader.get_streams(link, mime) 
+        self._main_window.populate_list(title, streams_text)     
             
-    def _on_download(self, itag:str, path:str) -> None:
+    def _on_download(self, link: str, itag:str, path:str) -> None:
         """
         Event raised when download is clicked
 
         Args:
+            link (str): link to download
             itag (str): itag to download
             path (str): path to download
         """
-        self._downloader.download(itag, path)
+        self._downloader.download(link, itag, path)
     
     def start(self) -> None:
         """
