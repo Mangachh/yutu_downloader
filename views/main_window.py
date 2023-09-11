@@ -134,12 +134,18 @@ class MainWindow(tk.Tk):
         print("Donwloading")
         path = filedialog.askdirectory(title="Select Folder")
         self.btn_download.config(text="DOWNLOADING")
+        self.btn_download.config(state="disabled")
         self.update_idletasks()
+        
         for f in self.on_click_download_methods:
             try:
-                f(self.link.get(), self.itag_selection.get(), path)
+                f(self.link.get(), self.itag_selection.get(), path, self._on_download_complete)
             except Exception as e:
                 print(e)
+        
+        
+    def _on_download_complete(self) -> None:
+        self.btn_download.config(state="active")
         self.btn_download.config(text="DOWNLOAD")
         
         

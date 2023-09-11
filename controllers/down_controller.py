@@ -1,5 +1,8 @@
 from serv.downloader import Downloader
 from views.main_window import MainWindow
+from threading import Thread
+
+import asyncio
 
 class DownController():
     _main_window: MainWindow
@@ -29,7 +32,7 @@ class DownController():
         title, streams_text = self._downloader.get_streams(link, mime) 
         self._main_window.populate_list(title, streams_text)     
             
-    def _on_download(self, link: str, itag:str, path:str) -> None:
+    def _on_download(self, link: str, itag:str, path:str, on_completed) -> None:
         """
         Event raised when download is clicked
 
@@ -38,7 +41,12 @@ class DownController():
             itag (str): itag to download
             path (str): path to download
         """
-        self._downloader.download(link, itag, path)
+        # self._downloader.download(link, itag, path)
+        #asyncio.run(self._downloader.download(link, itag, path))
+        print("Before thread")
+        Thread(target=self._downloader.download, args=(link, itag, path, on_completed)).start()
+        print("After thread")
+    
     
     def start(self) -> None:
         """

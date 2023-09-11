@@ -1,6 +1,6 @@
 from pytube import YouTube as yt
 from pytube.streams import Stream
-from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
+# from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import pathlib
 import os
 import ffmpeg
@@ -40,7 +40,7 @@ class Downloader():
         
         # self._streams = [stream for stream in url.streams if mime_type == stream.type]
         for stream in url.streams.filter(only_audio=(mime_type == MIME_AUDIO),
-                                        only_video=(mime_type == MIME_VIDEO), file_extension="mp4").all():            
+                                        only_video=(mime_type == MIME_VIDEO)).all():            
             if stream.type == mime_type:
                 if stream.type == MIME_AUDIO:
                     stream_text.append(self.audio_dict(stream))
@@ -87,7 +87,7 @@ class Downloader():
         # video["codec"] = stream.video_codec
         return video        
 
-    def download(self, link:str, itag: str, path:str)-> None:
+    def download(self, link:str, itag: str, path:str, on_complete)-> None:
         """
         Downloads a stream to a desired path. If the stream has audio type, 
         converts it to .mp3"
@@ -98,11 +98,13 @@ class Downloader():
             path (str): path to dowload
         """
         # get the stream
+        print("Downloader method")
         url = yt(link)
         try:
             stream = url.streams.get_by_itag(int(itag))
         except Exception as e:
             print(e)
+            on_complete
             return
             
         file = stream.download(output_path=path, filename_prefix="tmp_")
@@ -135,20 +137,22 @@ class Downloader():
                         print(e)
                         
                     # this is slow
-                    #video_clip = ffmpeg.input(file)
-                    #audio_clip = ffmpeg.input(audio_file)
-                    # ffmpeg.concat(video_clip, audio_clip, v=1, a=1).output(f"{path}/{url.title}_.mp4").run(overwrite_output=True)
+                    video_clip = ffmpeg.input(file)
+                    audio_clip = ffmpeg.input(audio_file)
+                    ffmpeg.concat(video_clip, audio_clip, v=1, a=1).output(f"{path}/{url.title}_.mp4").run(overwrite_output=True)
                     
                     # this is fastest
                     # like a lot
-                    subprocess.run(f"ffmpeg -i \"{file}\" -i \"{audio_file}\" -c copy \"{path}/{url.title}_.mp4\"")
+                    # subprocess.run(f"ffmpeg -i \"{file}\" -i \"{audio_file}\" -c copy \"{path}/{url.title}_.mp4\"")
                     os.remove(audio_file)
                     os.remove(file)
                                    
                 except Exception as e:
                     print(e)
                 pass
-                    
+            
+            
             # if video, download the audio pfffff
             # and merge
-            
+        print("completed")
+        on_complete()
