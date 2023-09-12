@@ -153,10 +153,8 @@ class MainWindow(tk.Tk):
         print("Search completed")
         
         self.btn_search.config(text="SEARCH")
-        self.btn_search.config(state="active")
-        
-        if self.itag_selection.get():
-            self.btn_download.place(relx=0.5, rely=0.6, anchor="center")
+        self.btn_search.config(state="active")   
+       
         
           
     def subscribe_on_click_search(self, fun) -> None:
@@ -202,6 +200,9 @@ class MainWindow(tk.Tk):
         text: str        
         self.list_frame.destroy()        
         self.create_video_audio_frame()
+        
+        if link_list is None or len(link_list) == 0:
+            return
         # video title
         tk.Label(self.list_frame, bg=self._COLOR_BACK, fg=self._COLOR_FONT, text=title, font="arial 15 bold", wraplength=400, justify="left").pack()
         # first sort the list
@@ -222,7 +223,9 @@ class MainWindow(tk.Tk):
             else:
                 return int(e['qual'][:-4])
         
+        
         link_list.sort(reverse=True, key=t)
+        
         
         for st in link_list:
             text = ""                     
@@ -250,3 +253,4 @@ class MainWindow(tk.Tk):
             radio_sel.pack(anchor="nw")
         
         self.itag_selection.set(link_list[0]["itag"])
+        self.btn_download.place(relx=0.5, rely=0.6, anchor="center")

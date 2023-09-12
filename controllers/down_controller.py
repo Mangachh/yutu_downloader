@@ -33,9 +33,8 @@ class DownController():
         Thread(target=self._streams_thread, args=(link, mime, on_complete_search)).start()
     
     def _streams_thread(self, link, mime, on_complete_search) -> None:
-        title, streams_text = self._downloader.get_streams(link, mime) 
+        title, streams_text = self._downloader.get_streams(link, mime, on_complete_search) 
         self._main_window.populate_list(title, streams_text)
-        on_complete_search()
         
           
     def _on_download(self, link: str, itag:str, path:str, on_completed) -> None:

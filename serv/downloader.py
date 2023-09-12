@@ -18,7 +18,7 @@ class Downloader():
     def get_title(self)->str:
         return self._title
         
-    def get_streams(self, link: str, mime_type: str) -> (str, list[dict]):
+    def get_streams(self, link: str, mime_type: str, on_complete_search) -> (str, list[dict]):
         """
         Gets all the streams filtered by the mime
 
@@ -30,7 +30,12 @@ class Downloader():
             list[dict]: dictionary with all the streams
         """
         print(f"Looking for link {link}")
-        url = yt(link)
+        try:
+            url = yt(link)
+        except Exception as e:
+            print("Wrong link")
+            on_complete_search()
+            return "",[]
         
         # save all the streams in our list, this way
         # when downloading video will
@@ -39,6 +44,7 @@ class Downloader():
         stream_text = []
         
         # self._streams = [stream for stream in url.streams if mime_type == stream.type]
+    
         for stream in url.streams.filter(only_audio=(mime_type == MIME_AUDIO),
                                         only_video=(mime_type == MIME_VIDEO)).all():            
             if stream.type == mime_type:
@@ -49,8 +55,9 @@ class Downloader():
         
         
         
-        # print(stream_text)
         
+        # print(stream_text)
+        on_complete_search()
         return (url.title, stream_text)
     
     def audio_dict(self, stream: Stream) -> dict[str, str]:
