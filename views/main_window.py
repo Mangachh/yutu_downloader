@@ -114,18 +114,18 @@ class MainWindow(tk.Tk):
         print("Click!")
         print(f"Link: {self.link.get()}\nMime: {self.mime_var.get()}")
         self.btn_search.config(text="SEARCHING")
+        self.btn_search.config(state='disabled')
         self.update_idletasks()
         # aquí ira la func que queremos
         for m in self.on_click_search_methods:
             try:
-                m(self.link.get(), self.mime_var.get())
+                m(self.link.get(), self.mime_var.get(), self._on_search_complete)
             except Exception as e:
                 print(e)
-        self.btn_search.config(text="SEARCH")
+        # self.btn_search.config(text="SEARCH")
         
         # Download button
-        if self.itag_selection.get():
-            self.btn_download.place(relx=0.5, rely=0.6, anchor="center")
+        
         
     def on_click_download(self) -> None:
         """
@@ -149,6 +149,16 @@ class MainWindow(tk.Tk):
         self.btn_download.config(text="DOWNLOAD")
         
         
+    def _on_search_complete(self) ->None:
+        print("Search completed")
+        
+        self.btn_search.config(text="SEARCH")
+        self.btn_search.config(state="active")
+        
+        if self.itag_selection.get():
+            self.btn_download.place(relx=0.5, rely=0.6, anchor="center")
+        
+          
     def subscribe_on_click_search(self, fun) -> None:
         """_summary_
         Subscribes to the event raised when the button btn_search is clicked

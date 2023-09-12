@@ -50,6 +50,7 @@ class Downloader():
         
         
         # print(stream_text)
+        
         return (url.title, stream_text)
     
     def audio_dict(self, stream: Stream) -> dict[str, str]:
@@ -100,6 +101,7 @@ class Downloader():
         # get the stream
         print("Downloader method")
         url = yt(link)
+        
         try:
             stream = url.streams.get_by_itag(int(itag))
         except Exception as e:
@@ -137,13 +139,13 @@ class Downloader():
                         print(e)
                         
                     # this is slow
-                    video_clip = ffmpeg.input(file)
-                    audio_clip = ffmpeg.input(audio_file)
-                    ffmpeg.concat(video_clip, audio_clip, v=1, a=1).output(f"{path}/{url.title}_.mp4").run(overwrite_output=True)
+                    # video_clip = ffmpeg.input(file)
+                    # audio_clip = ffmpeg.input(audio_file)
+                    # ffmpeg.concat(video_clip, audio_clip, v=1, a=1).output(f"{path}/{url.title}_.mp4").run(overwrite_output=True)
                     
                     # this is fastest
                     # like a lot
-                    # subprocess.run(f"ffmpeg -i \"{file}\" -i \"{audio_file}\" -c copy \"{path}/{url.title}_.mp4\"")
+                    subprocess.run(f"ffmpeg -i \"{file}\" -i \"{audio_file}\" -c copy \"{path}/{url.title}_.mp4\"")
                     os.remove(audio_file)
                     os.remove(file)
                                    

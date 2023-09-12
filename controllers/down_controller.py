@@ -18,7 +18,7 @@ class DownController():
         self._downloader = Downloader()
         # add events and so...
         
-    def _on_click_search(self, link:str, mime:str) -> None:
+    def _on_click_search(self, link:str, mime:str, on_complete_search) -> None:
         """
         Event raised when clicking search
 
@@ -29,9 +29,15 @@ class DownController():
         print("OnClick controller")
         print(f"Link: {link}\tMime: {mime}")
         # get the list
+        
+        Thread(target=self._streams_thread, args=(link, mime, on_complete_search)).start()
+    
+    def _streams_thread(self, link, mime, on_complete_search) -> None:
         title, streams_text = self._downloader.get_streams(link, mime) 
-        self._main_window.populate_list(title, streams_text)     
-            
+        self._main_window.populate_list(title, streams_text)
+        on_complete_search()
+        
+          
     def _on_download(self, link: str, itag:str, path:str, on_completed) -> None:
         """
         Event raised when download is clicked
@@ -42,9 +48,10 @@ class DownController():
             path (str): path to download
         """
         # self._downloader.download(link, itag, path)
-        #asyncio.run(self._downloader.download(link, itag, path))
+        # asyncio.run(self._downloader.download(link, itag, path, on_completed))
         print("Before thread")
         Thread(target=self._downloader.download, args=(link, itag, path, on_completed)).start()
+        
         print("After thread")
     
     
